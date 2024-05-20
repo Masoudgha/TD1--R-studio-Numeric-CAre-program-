@@ -1,0 +1,301 @@
+---
+title: "TD1 R methodes numeric"
+author: "Masoud ghanaatian"
+date: "2024-05-19"
+output: output=github_document
+---
+
+
+## R Markdown
+For a continuous variable X, the probability density function pdf is the mathematical function f whose the area under curve between a and b give the probability:
+
+                         P(a≤X≤b)=∫baf(x)dx
+                         
+                         
+For a discrete random variable X taking values in a space value ξ, the probability mass functions p.m.f are the probabilities P(X=k),k∈ξ the cumulative distribution function c.d.f. is
+
+                               F(x)=P(X≤x)
+
+the quantile function is Q(α)=F−1(α);that is to say the value of x such that P(X≤x)=α.
+N.B.: Q(0.5) is the median of X, Q(0.25) is the first quartile and Q(0.75) is the third quartile
+
+#Expectation, variance, covariance:
+
+#Generating distributions
+*rnorm, rexp, rbinom, rpois to simulate random variables with respectively Gaussian, exponential, binomial and poisson distributions
+*pnorm, pexp, pbinom, ppois to to evaluate the c.d.f. of random variables with respectively Gaussian, exponential, binomial and poisson distributions
+*qnorm, qexp, qbinom, qpois to to evaluate the quantile function, i.e. the inverse of the c.d.f. of random variables with respectively Gaussian, exponential, binomial and poisson distributions
+*dnorm, dexp, dbinom, dpois to to evaluate the density or p.m.f. of random variables with respectively Gaussian, exponential, binomial and poisson distributions
+
+
+
+
+```{r }
+plot(function(x) dnorm(x,mean=0,sd=1), xlim=c(-5,5), ylab="title of y axis", xlab="title of x axis", main="density of the gaussian distribution")
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r}
+plot(function(x) pnorm(x,mean=0,sd=1), xlim=c(-5,5), ylab="", main="c.d.f. of the gaussian distribution")
+```
+```{r}
+barplot(dpois(0:10,4),ylab="Probability",xlab="k",
+space=2,ylim=c(0,0.2), names.arg=0:10, main="p.m.f. of the poisson distribution with parameter 4")
+```
+
+
+```{r}
+plot(function(x) ppois(x,4), xlim=c(-1,10), ylab="", main="c.d.f. of the poisson distribution with parameter 4")
+```
+
+
+
+#2. Simulation of classical distributions
+First, fix the seed by using the following command set.seed(1)
+
+```{r}
+set.seed(1)
+```
+*Using the R functions rexp, rnorm, rbinom, generate i.i.d. samples X1, X2 and X3 of size n=10000
+respectively from exponential distribution with shame parameter λ=2, from Gaussian distribution with mean value μ=3 and standard deviation sd=2 and from Bernoulli distribution with probability of success p=0.25
+*Create a data frame X(R command data.frame) which contains X1, X2 and X3 Print the top of the data frame (use head).
+*Using the R function apply, Calculate the mean value and the empirical variance of the samples. Compare with the theoretical values. Evaluate the Pearson’s correlation between the 3 samples and also the covariance matrix (use cor(X), cov(X)).
+*Plot the histogram of the distributions of the exponential and Gaussian distribution and add the corresponding density curves (use hist(X1, freq=FALSE)) print the table of frequency (use table(X3)/n) and compare these values with p and 1−p
+
+```{r }
+n=10000
+
+X1<-rexp(n,2)
+X2<-rnorm(n,3,2)
+X3<-rbinom(n,1,0.25)
+
+X=data.frame(exp=X1,Gauss=X2,Bernouilli=X3) ###create a data frame
+#colnames(X)=c("newnames1","newnames2","newnames3") #to rename the column of X
+head(X)  ##Print the head of the matrix (or dataset) X
+
+```
+```{r }
+apply(X,2,mean)
+```
+
+
+```{r }
+mean1<-sum(X1)/n
+var1<- mean( (X1- mean(X1))^2)
+print(mean1)
+```
+
+
+```{r }
+print(var1)
+```
+
+
+
+```{r }
+apply(X,2,var)
+```
+```{r }
+X4<-X1+rnorm(n)
+cov(X1,X4)
+```
+```{r }
+cov(X)
+```
+
+```{r }
+cor(X)
+```
+```{r }
+hist(X1,breaks=30,freq=FALSE)
+plot(function(x) dexp(x,2),add=TRUE,col="red",xlim=c(0,5))
+```
+```{r }
+hist(X2,breaks=30,freq=FALSE)
+plot(function(x) dnorm(x,3,2),add=TRUE,col="red",xlim=c(-10,10))
+```
+
+```{r }
+table(X3)/n
+```
+```{r }
+pie(table(X3),labels=c("males","females"))
+```
+
+#Simulating distributions using uniform samplings
+Let U a random variable distributed from the uniform distribution on [0,1]. Then for any cumulative distribution function F, the random variable Z=F**1(U)has distribution F.
+Using this result, simulate the same exponential, Gaussian samples and answer the same questions as exercise 1. Use the r function runif, qexp, qnorm, qbinom
+
+```{r }
+U1=runif(n)
+U2=runif(n)
+U3=runif(n)
+X1= qexp(U1, 2)
+X2= qnorm(U2,3,2)
+X3=qbinom(U3,1,0.25)
+
+X=data.frame(exp=X1,Gauss=X2,Bernouilli=X3) ########concatenation de X1, X2 and X3
+head(X)  ##matrice X
+
+apply(X,2,mean)
+apply(X,2,var)
+cor(X)
+hist(X1,breaks=30,freq=FALSE)
+hist(X2,breaks=30,freq=FALSE)
+table(X3)
+
+```
+
+*Let X a continuous random variable with c.d.f. F. Then the random variable Z=F(X) is uniformly distributed on [0,1].
+*Using this result, from a Gaussian distribution, then from an exponential distribution, simulate uniform sample on [0,1].
+
+
+```{r }
+X1=rexp(n,2)
+hist(X1)
+```
+
+
+
+```{r }
+U1<-pexp(X1,2)
+hist(U1)
+```
+
+
+
+
+
+```{r }
+Z=qexp(U1,2)
+hist(Z)
+```
+#Theorem Central Limit (TCL), convergence in distribution
+Let X1,…,Xn an i.i.d. sample with expectation E(X)=μ and variance Var(X)=σ2. Then,
+
+                     √n(X¯n−μ)→N(0,σ2)as soons as n→∞
+                     
+We say that the mean value X¯n converges in distribution to a Gaussian distribution.
+
+Using a loop ‘for’, simulate M=104 samples of size n=1000 from a Poisson distribution with parameter λ=5
+and verify the theorem. Plot the histogram of the statistic with the density of the Gaussian.
+
+```{r }
+M=10^4;n=10^3
+Z=NULL;
+for(m in 1:M){
+  X=rpois(n,5)
+  Z[m]=sqrt(n)*(mean(X) - 5)
+}
+hist(Z,freq=FALSE)
+plot(function(x) dnorm(x,0,sqrt(5)),add=TRUE,col="red",xlim=c(-6,6) )
+```
+Note that pour a Poisson distribution the expectation and the variance is λ=5, so the standard deviation is √λ=5.
+try now with a exponential distribution with rate parameter λ=5. Note that for an exponential distribution the expectation is 1/λ=1/5, and the variance is 1/λ**2=1/25 (so the sd is 1/5)
+
+
+```{r }
+M=10^4;n=10^3
+Z=NULL;
+for(m in 1:M){
+  X=rexp(n,5)
+  Z[m]=sqrt(n)*(mean(X) - 1/5)
+}
+hist(Z,freq=FALSE)
+plot(function(x) dnorm(x,0,sqrt(1/25)),add=TRUE,col="red",xlim=c(-1,1) )
+```
+#Law of large numbers (LLN), almost surely convergence
+Let X1,…,Xn an i.i.d. sample with expectation μ. Then
+
+                    P(X¯n→μ)=1
+                 
+We say that X¯n converges almost surely (a.s.) to μ.
+
+simulate a sample of size n=104 of exponential distribution with parameter λ=2. For k varying from 1 to n, evaluate the mean value Zk=X¯k. Plot the sequence Zk and add the horizontal line y=0.5 (use abline(h=0.5)).
+
+#Multivariate Gaussian distribution
+
+Any symmetric definite-positive matrix Σ can to be decompose in the product of an lower triangular matrix L
+(composed with 0 above the diagonal) and his transposed:
+
+                        Σ=LL**T
+Find these two triangular matrices require specific algebra algorithm (refereed as the Cholesky decomposition).
+Let:
+                                    Σ=(10    0.4
+                                      4        1)
+Using the eigen R function that provides the eigen value of a matrix, check that the matrix Σ is definite-positive (Note that a symmetric matrix is positive definite if and only if all the eigen values of Σ are strictly positives). Use the R function chol to get the lower triangular matrix. Make the matricial product to check that Σ=LL**T. The R matricial product is %*% and the transpose operation is t().
+                        
+
+```{r }
+sigma=matrix(c(1,0.4,0.4,1),2,2)
+eigen(sigma)
+```
+```{r }
+L=t(chol(sigma))
+L%*%t(L)
+```
+# Simulating of the multivariate Gaussian distribution
+
+```{r }
+library(mvtnorm) #Pakacage
+```
+
+
+```{r }
+sigma=matrix(c(1,0.4,0.4,1),2,2) #matrix sigma
+m=c(0,0) #mean value vector m
+X<-rmvnorm(M,m,sigma)
+```
+
+Plot the sample and the two histograms
+Calculate the mean value and the empirical variance of the two component of the samples and the empirical covariance between the two components.
+Start again with:
+                       Σ2=(1    0.10             Σ3=(1     0.9 0.91)
+                           1      1) and    
+                           
+Use the following code to add the ‘contour-plot’ of the distribution  :
+
+```{r }
+library(rvinecopulib) #Pakacage
+```
+
+
+```{r }
+plot(X[,1],X[,2],main=paste("rho=",0.4))
+Cn <- bicop_dist(family = "gaussian", rotation = 0, parameters =0.4)
+contour(Cn,col="blue",add=TRUE)
+```
+#Other multivariate distributions
+Simulate a bivariate sample (X1,Y1),…,(Xn,Yn) in which X1,…,Xn are i.i.d. and follow a exponential distribution with shape parameter λ=3, Y1,…,Yn are i.i.d. and follow a Gaussian distribution white mean value μ=2 and variance σ2=1, and such that X1and X2 be correlated
+To do that:
+*Simulate a (X1,Y1),…,(Xn,Yn) following a multivariate Gaussian distribution with mean value m=(2,2)
+and covariance 0.4 using the R package mvtnorm and the function rmvnorm.
+*Transform X1,…,Xn in order to obtain an uniform sample following Exercise 2.
+*Transform the uniform sample in order to obtain an exponential sample following Exercise 2.
+*plot Y vs X
+*Plot the histogram of X1,…,Xn and Y1,…,Yn
+*print the Pearson’s correlation and Spearman’s correlation.
+
+
+```{r }
+xhist <- hist(X[,1], plot=FALSE)
+yhist <- hist(X[,2], plot=FALSE)
+top <- max(c(xhist$density, yhist$density))
+nf <- layout(matrix(c(2,0,1,3),2,2,byrow=TRUE), c(3,1), c(1,3), TRUE)
+par(mar=c(4,4,1,1))
+#image(vx,vy,z,col=rev(heat.colors(101)))
+plot(X,cex=0.2)
+#points(X,cex=.2)
+par(mar=c(0,3,1,1))
+barplot(xhist$density, axes=FALSE, ylim=c(0, top), space=0)
+lines((density(X[,1])$x-xhist$breaks[1])/diff(xhist$breaks)[1],
+      dexp(density(X[,1])$x,3),col="red")
+par(mar=c(3,0,1,1))
+barplot(yhist$density, axes=FALSE, xlim=c(0, top), space=0, 
+        horiz=TRUE)
+lines(dnorm(density(X[,2])$x,2,1),(density(X[,2])$x-yhist$breaks[1])/
+      diff(yhist$breaks)[1],col="red")
+```
